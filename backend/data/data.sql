@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS foods(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    descr VARCHAR(100) NOT NULL,
+    price VARCHAR(100) NOT NULL,
+    qty INT,
+    created_at TIMESTAMP DEFAULT NOW()
+)
