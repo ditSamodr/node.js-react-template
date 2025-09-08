@@ -15,7 +15,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/modernize-mui-admin',
+  base: '/',
 
   server: {
     host: '0.0.0.0',
