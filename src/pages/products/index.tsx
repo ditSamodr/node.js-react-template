@@ -1,4 +1,13 @@
-import { Box, LinearProgress, TextField, Button, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material';
+import {
+  Box,
+  LinearProgress,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+} from '@mui/material';
 import { DataGrid, GridApi, GridColDef, GridSlots, useGridApiRef } from '@mui/x-data-grid';
 import CustomDataGridFooter from 'components/common/table/CustomDataGridFooter';
 import CustomDataGridHeader from 'components/common/table/CustomDataGridHeader';
@@ -33,39 +42,37 @@ export const topProductsColumns: GridColDef<TopProductsRowData>[] = [
 ];
 
 const ProductsPage = () => {
+  const [searchText, setSearchText] = useState('');
 
-    const [searchText, setSearchText] = useState('');
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: '',
+    sold: '',
+  });
+  const apiRef = useGridApiRef<GridApi>();
 
-    const [newProduct, setNewProduct] = useState({
-      name: '',
-      price: '',
-      sold: '',
-    });
-    const apiRef = useGridApiRef<GridApi>();
+  useEffect(() => {
+    apiRef.current.setRows(topProductsTableData);//ambil data dari sini
+  }, [apiRef]);
 
+  useEffect(() => {
+    apiRef.current.setQuickFilterValues([searchText]);
+  }, [searchText, apiRef]);
 
-    useEffect(() => {
-      apiRef.current.setRows(topProductsTableData);//ambil data dari sini
-    }, [apiRef]);
-  
-    useEffect(() => {
-      apiRef.current.setQuickFilterValues([searchText]);
-    }, [searchText, apiRef]);
-  
-    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-      const searchValue = event.currentTarget.value;
-      setSearchText(searchValue);
-      if (searchValue === '') {
-        apiRef.current.setRows(topProductsTableData);
-      }
-    };
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const searchValue = event.currentTarget.value;
+    setSearchText(searchValue);
+    if (searchValue === '') {
+      apiRef.current.setRows(topProductsTableData);
+    }
+  };
 
-    const handleNewProductChange = (event: ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = event.target;
-      setNewProduct((prev) => ({ ...prev, [name]: value }));
-    };
+  const handleNewProductChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setNewProduct((prev) => ({ ...prev, [name]: value }));
+  };
 
-      const handleAddProduct = (event: FormEvent) => {
+  const handleAddProduct = (event: FormEvent) => {
     event.preventDefault();
     if (newProduct.name && newProduct.price && newProduct.sold) {
       const newEntry = {
@@ -82,10 +89,9 @@ const ProductsPage = () => {
       setNewProduct({ name: '', price: '', sold: '' });
     }
   };
-    
-  
+
   return (
-      <Box
+    <Box
       sx={{
         overflow: 'hidden',
         minHeight: 0,
@@ -93,7 +99,7 @@ const ProductsPage = () => {
         height: { xs: 'auto', sm: 1 },
       }}
     >
-            <Box
+      <Box
         component="form"
         onSubmit={handleAddProduct}
         sx={{
@@ -136,10 +142,9 @@ const ProductsPage = () => {
           required
         />
         <Button
-          type="submit"
+        type="submit"
           variant="contained"
-          sx={{ alignSelf: 'center', height: '56px' }}
-        >
+          sx={{ alignSelf: 'center', height: '56px' }}>
           Add Product
         </Button>
       </Box>
