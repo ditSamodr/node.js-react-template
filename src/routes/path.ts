@@ -12,6 +12,7 @@ const paths = {
   default: `${rootPaths.root}`,
   categories: `${rootPaths.pagesRoot}categories`,
   products: `${rootPaths.pagesRoot}products`,
+  addproduct: `${rootPaths.pagesRoot}addproduct`,
   customers: `${rootPaths.pagesRoot}customers`,
   orders: `${rootPaths.pagesRoot}orders`,
   reports: `${rootPaths.pagesRoot}reports`,

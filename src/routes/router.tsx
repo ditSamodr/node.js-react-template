@@ -20,6 +20,7 @@ const CustomersPage = lazy(() => import('pages/customers'));
 const ReportsPage = lazy(() => import('pages/reports'));
 const CouponsPage = lazy(() => import('pages/coupons'));
 const InboxPage = lazy(() => import('pages/inbox'));
+const AddProductPage = lazy(() => import('pages/addproduct'));
 const NotFoundPage = lazy(() => import('pages/not-found'));
 /* -------------------------------------------------------------------------- */
 
@@ -53,6 +54,10 @@ export const routes = [
           {
             path: paths.products,
             element: <ProductsPage />,
+          },
+          {
+            path: paths.products,
+            element: <AddProductPage />,
           },
           {
             path: paths.customers,

@@ -164,4 +164,10 @@ export const topProductsTableData: TopProductsRowData[] = [
     price: 34.9,
     sold: 5,
   },
+  {
+    id: uniqueId(),
+    product: { title: 'Men Shit Shirt', image: product5 },
+    price: 39.1,
+    sold: 45,
+  },
 ];
