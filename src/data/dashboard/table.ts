@@ -3,6 +3,8 @@ import product2 from 'assets/images/products/product-2.png';
 import product3 from 'assets/images/products/product-3.png';
 import product4 from 'assets/images/products/product-4.png';
 import product5 from 'assets/images/products/product-5.png';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { uniqueId } from 'lodash';
 
 export interface TransactionRowData {
@@ -133,6 +135,28 @@ export const transactionTableData: TransactionRowData[] = [
   },
 ];
 
+const ProductTable = () => {
+  const [products, setProducts] = useState<TopProductsRowData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/products');
+        setProducts(response.data);
+      } catch (err) {
+        setError('Failed to fetch products');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+}
+
 export const topProductsTableData: TopProductsRowData[] = [
   {
     id: uniqueId(),
@@ -168,6 +192,6 @@ export const topProductsTableData: TopProductsRowData[] = [
     id: uniqueId(),
     product: { title: 'Men Shit Shirt', image: product5 },
     price: 39.1,
-    sold: 45,
+    sold: 5,
   },
 ];

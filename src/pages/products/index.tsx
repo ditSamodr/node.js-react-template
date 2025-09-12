@@ -9,6 +9,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { DataGrid, GridApi, GridColDef, GridSlots, useGridApiRef } from '@mui/x-data-grid';
+import axios from 'axios';
 import CustomDataGridFooter from 'components/common/table/CustomDataGridFooter';
 import CustomDataGridHeader from 'components/common/table/CustomDataGridHeader';
 import CustomDataGridNoRows from 'components/common/table/CustomDataGridNoRows';
@@ -39,15 +40,45 @@ export const topProductsColumns: GridColDef<TopProductsRowData>[] = [
     width: 100,
   },
   { field: 'sold', headerName: 'Units Sold', width: 100, align: 'left' },
+  {
+    field: 'actions',
+    headerName: 'Actions',
+    width: 150,
+    sortable: false,
+    filterable: false,
+    renderCell: (params) => (
+      
+      <div>
+        <Button
+          variant="outlined"
+          size="small"
+          //onClick={() => handleEditProduct(params.row.id)}
+        >
+          Update
+        </Button>
+        
+         <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          //onClick={() => handleDeleteProduct(params.row.id)}
+        >
+          Delete
+        </Button>
+        {/* You can add more buttons here, like an "Edit" button */}
+      </div>
+    ),
+  },
 ];
 
 const ProductsPage = () => {
   const [searchText, setSearchText] = useState('');
 
   const [newProduct, setNewProduct] = useState({
-    name: '',
+    title: '',
     price: '',
     sold: '',
+    image: ''
   });
   const apiRef = useGridApiRef<GridApi>();
 
@@ -67,29 +98,77 @@ const ProductsPage = () => {
     }
   };
 
+  const ProductForm = () =>{
+    const [newProduct, setNewProduct] = useState({
+      title: '',
+      price: '',
+      sold: '',
+      image: ''
+    });
+  };
+
   const handleNewProductChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
-
-  const handleAddProduct = (event: FormEvent) => {
+  
+  
+  const handleAddProduct = async (event: FormEvent) => {
+    console.log('handleAddProd is running');
     event.preventDefault();
-    if (newProduct.name && newProduct.price && newProduct.sold) {
-      const newEntry = {
-        id: Date.now(), // Unique ID for the new row
-        product: { title: newProduct.name, image: '' },
-        price: parseFloat(newProduct.price),
+    if (newProduct.title && newProduct.price && newProduct.sold && newProduct.image) {
+      const response = await axios.post('http://localhost:3001/api/products',{
+        title: newProduct.title,
+        price: parseInt(newProduct.price),
         sold: parseInt(newProduct.sold),
-      };
+        image: newProduct.image
+      });
+
+        // id: Date.now(), // Unique ID for the new row
+        // product: { title: newProduct.name, image: '' },
+        // price: parseFloat(newProduct.price),
+        // sold: parseInt(newProduct.sold),
+      console.log('Product added successfully', response.data);
 
       //topProductsTableData.push(newEntry);
-      apiRef.current.setRows([...topProductsTableData]);
+      //apiRef.current.setRows([...topProductsTableData]);
 
       // Clear form
-      setNewProduct({ name: '', price: '', sold: '' });
+      setNewProduct({ title: '', price: '', sold: '' , image: ''});
     }
   };
 
+  type Product = {
+    id: string | number;
+    product: {title: string; image:string};
+    price: number;
+    sold: number;
+  };
+
+  const ProductsTable = () => {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const response = await axios.get('http://localhost:3001/api/products');
+          setProducts(response.data);
+        } catch (err) {
+          console.error("Failed to fetch products:", err);
+          setError("Failed to load products.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProducts();
+    }, []);
+    if (error) {
+      return <div>Error: {error}</div>;
+    }
+  }
+  
   return (
     <Box
       sx={{
@@ -115,8 +194,8 @@ const ProductsPage = () => {
       >
         <TextField
           label="Product Name"
-          name="name"
-          value={newProduct.name}
+          name="title"
+          value={newProduct.title}
           onChange={handleNewProductChange}
           required
         />
@@ -139,6 +218,13 @@ const ProductsPage = () => {
           value={newProduct.sold}
           onChange={handleNewProductChange}
           type="number"
+          required
+        />
+        <TextField
+          label="Image"
+          name="image"
+          value={newProduct.image}
+          onChange={handleNewProductChange}
           required
         />
         <Button
