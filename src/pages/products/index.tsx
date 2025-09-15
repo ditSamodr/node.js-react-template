@@ -19,7 +19,200 @@ import { currencyFormat } from 'helpers/utils';
 import { ChangeEvent, useEffect, useState, FormEvent } from 'react';
 import SimpleBar from 'simplebar-react';
 
-export const topProductsColumns: GridColDef<TopProductsRowData>[] = [
+interface ProductData{
+  id?: string;
+  title: string;
+  price: string;
+  sold: string;
+  image: string;
+}
+
+const ProductsPage = () => {
+  const [searchText, setSearchText] = useState('');
+
+  const [newProduct, setNewProduct] = useState({
+    title: '',
+    price: '',
+    sold: '',
+    image: ''
+  });
+
+  const [formData, setFormData] = useState<ProductData>({
+    title: '',
+    price: '',
+    sold: '',
+    image: ''
+  });
+
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      price: '',
+      sold: '',
+      image: '',
+    });
+    setEditingProductId(null);
+  };
+
+  type Product = {
+    id: string;
+    product: {title: string; image:string};
+    price: number;
+    sold: number;
+  };
+
+  const apiRef = useGridApiRef<GridApi>();
+
+  useEffect(() => {
+    apiRef.current.setRows(products);//ambil data dari sini
+  }, [apiRef]);
+
+  useEffect(() => {
+    apiRef.current.setQuickFilterValues([searchText]);
+  }, [searchText, apiRef]);
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const searchValue = event.currentTarget.value;
+    setSearchText(searchValue);
+    if (searchValue === '') {
+      apiRef.current.setRows(products);
+    }
+  };
+
+  const ProductForm = () =>{
+    const [newProduct, setNewProduct] = useState({
+      title: '',
+      price: '',
+      sold: '',
+      image: ''
+    });
+  };
+
+  const handleNewProductChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setNewProduct((prev) => ({ ...prev, [name]: value }));
+  };
+  
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await axios.delete(`http://localhost:3001/api/products/${productId}`);
+      
+      // Update the UI by filtering out the deleted product
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.id !== productId)
+      );
+      alert('Product deleted successfully!');
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+      alert('Failed to delete product.');
+    }
+  };
+
+  const handleUpdateProduct = async (editingProductId: string) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3001/api/products/${editingProductId}`,
+        {
+         // ...formData,
+          title: newProduct.title,
+          price: parseFloat(newProduct.price),
+          sold: parseInt(newProduct.sold),
+          image: newProduct.image,
+        }
+      );
+
+      // Update the UI with the new data
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === editingProductId ? response.data.data : product
+        )
+      );
+      alert('Product updated successfully!');
+    } catch (error) {
+      console.error('Failed to update product:', error);
+      alert('Failed to update product.');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingProductId) {
+        // If there is an editing ID, call the update function
+        await handleUpdateProduct(editingProductId);
+    } else {
+        // Otherwise, call the add function
+       // await handleAddProduct(event: FormEvent);
+    }
+};
+
+  const handleAddProduct = async (event: FormEvent) => {
+    event.preventDefault();
+    if (newProduct.title && newProduct.price && newProduct.sold && newProduct.image) {
+      const response = await axios.post('http://localhost:3001/api/products',{
+        title: newProduct.title,
+        price: parseInt(newProduct.price),
+        sold: parseInt(newProduct.sold),
+        image: newProduct.image
+      });
+      console.log('Product added successfully', response.data);
+      // Clear form
+      setNewProduct({ title: '', price: '', sold: '' , image: ''});
+    }
+  };
+
+
+
+
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const response = await axios.get('http://localhost:3001/api/products');
+          const productsArray = response.data; 
+          
+          if (Array.isArray(productsArray)) {
+            const formattedData: TopProductsRowData[] = productsArray.map((item: any) => ({
+                id: item.id.toString(),
+                product: { 
+                    title: item.title, 
+                    image: item.image  
+                },
+                price: item.price,
+                sold: item.sold,
+            }));
+            setProducts(formattedData);
+        } else {
+            console.error("API response is not an array:", response.data);
+        }
+        } catch (err) {
+          console.error("Failed to fetch products:", err);
+          setError("Failed to load products.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProducts();
+    }, []);
+    if (error) {
+      return <div>Error: {error}</div>;
+    }
+  
+  const handleEditClick = (productToEdit: ProductData)=>{
+    setFormData(productToEdit);
+    setEditingProductId(productToEdit.id as string);
+  }
+
+  const topProductsColumns: GridColDef<TopProductsRowData>[] = [
   {
     field: 'product',
     valueGetter: (params: ItemType) => {
@@ -47,12 +240,11 @@ export const topProductsColumns: GridColDef<TopProductsRowData>[] = [
     sortable: false,
     filterable: false,
     renderCell: (params) => (
-      
       <div>
         <Button
           variant="outlined"
           size="small"
-          //onClick={() => handleEditProduct(params.row.id)}
+          onClick={() => handleUpdateProduct(params.row.id)}
         >
           Update
         </Button>
@@ -61,7 +253,7 @@ export const topProductsColumns: GridColDef<TopProductsRowData>[] = [
           variant="outlined"
           color="error"
           size="small"
-          //onClick={() => handleDeleteProduct(params.row.id)}
+          onClick={() => handleDeleteProduct(params.row.id)}
         >
           Delete
         </Button>
@@ -71,104 +263,6 @@ export const topProductsColumns: GridColDef<TopProductsRowData>[] = [
   },
 ];
 
-const ProductsPage = () => {
-  const [searchText, setSearchText] = useState('');
-
-  const [newProduct, setNewProduct] = useState({
-    title: '',
-    price: '',
-    sold: '',
-    image: ''
-  });
-  const apiRef = useGridApiRef<GridApi>();
-
-  useEffect(() => {
-    apiRef.current.setRows(topProductsTableData);//ambil data dari sini
-  }, [apiRef]);
-
-  useEffect(() => {
-    apiRef.current.setQuickFilterValues([searchText]);
-  }, [searchText, apiRef]);
-
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const searchValue = event.currentTarget.value;
-    setSearchText(searchValue);
-    if (searchValue === '') {
-      apiRef.current.setRows(topProductsTableData);
-    }
-  };
-
-  const ProductForm = () =>{
-    const [newProduct, setNewProduct] = useState({
-      title: '',
-      price: '',
-      sold: '',
-      image: ''
-    });
-  };
-
-  const handleNewProductChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setNewProduct((prev) => ({ ...prev, [name]: value }));
-  };
-  
-  
-  const handleAddProduct = async (event: FormEvent) => {
-    console.log('handleAddProd is running');
-    event.preventDefault();
-    if (newProduct.title && newProduct.price && newProduct.sold && newProduct.image) {
-      const response = await axios.post('http://localhost:3001/api/products',{
-        title: newProduct.title,
-        price: parseInt(newProduct.price),
-        sold: parseInt(newProduct.sold),
-        image: newProduct.image
-      });
-
-        // id: Date.now(), // Unique ID for the new row
-        // product: { title: newProduct.name, image: '' },
-        // price: parseFloat(newProduct.price),
-        // sold: parseInt(newProduct.sold),
-      console.log('Product added successfully', response.data);
-
-      //topProductsTableData.push(newEntry);
-      //apiRef.current.setRows([...topProductsTableData]);
-
-      // Clear form
-      setNewProduct({ title: '', price: '', sold: '' , image: ''});
-    }
-  };
-
-  type Product = {
-    id: string | number;
-    product: {title: string; image:string};
-    price: number;
-    sold: number;
-  };
-
-  const ProductsTable = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-      const fetchProducts = async () => {
-        try {
-          const response = await axios.get('http://localhost:3001/api/products');
-          setProducts(response.data);
-        } catch (err) {
-          console.error("Failed to fetch products:", err);
-          setError("Failed to load products.");
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchProducts();
-    }, []);
-    if (error) {
-      return <div>Error: {error}</div>;
-    }
-  }
-  
   return (
     <Box
       sx={{
@@ -180,7 +274,7 @@ const ProductsPage = () => {
     >
       <Box
         component="form"
-        onSubmit={handleAddProduct}
+        onSubmit={handleSubmit}
         sx={{
           display: 'flex',
           gap: 2,
@@ -228,14 +322,16 @@ const ProductsPage = () => {
           required
         />
         <Button
-        type="submit"
+          type="submit"
           variant="contained"
           sx={{ alignSelf: 'center', height: '56px' }}>
-          Add Product
+          {editingProductId ? 'Update Product': 'Add Product'}
+          
         </Button>
       </Box>
       <SimpleBar>
         <DataGrid
+          rows={products}
           autoHeight={false}
           columns={topProductsColumns}
           onResize={() => {
@@ -267,10 +363,10 @@ const ProductsPage = () => {
               onChange: handleChange,
               clearSearch: () => {
                 setSearchText('');
-                apiRef.current.setRows(topProductsTableData);
+                apiRef.current.setRows(products);
               },
             },
-            pagination: { labelRowsPerPage: topProductsTableData.length },
+            pagination: { labelRowsPerPage: products.length },
           }}
           initialState={{ pagination: { paginationModel: { page: 1, pageSize: 5 } } }}
           pageSizeOptions={[5, 10, 25]}

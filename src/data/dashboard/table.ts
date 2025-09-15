@@ -21,7 +21,10 @@ export interface ItemType {
 
 export interface TopProductsRowData {
   id: string;
-  product: ItemType;
+  product: {
+    title: string;
+    image: string
+  };
   price: number;
   sold: number;
   searchableText?: string;
@@ -158,40 +161,40 @@ const ProductTable = () => {
 }
 
 export const topProductsTableData: TopProductsRowData[] = [
-  {
-    id: uniqueId(),
-    product: { title: 'Men Grey Hoodie', image: product1 },
-    price: 99.9,
-    sold: 5,
-  },
-  {
-    id: uniqueId(),
-    product: { title: 'Women Striped T-Shirt', image: product2 },
-    price: 54.9,
-    sold: 5,
-  },
-  {
-    id: uniqueId(),
-    product: { title: 'Wome White T-Shirt', image: product3 },
-    price: 24.7,
-    sold: 5,
-  },
-  {
-    id: uniqueId(),
-    product: { title: 'Men White T-Shirt', image: product4 },
-    price: 44.4,
-    sold: 5,
-  },
-  {
-    id: uniqueId(),
-    product: { title: 'Men White T-Shirt', image: product5 },
-    price: 34.9,
-    sold: 5,
-  },
-  {
-    id: uniqueId(),
-    product: { title: 'Men Shit Shirt', image: product5 },
-    price: 39.1,
-    sold: 5,
-  },
+  // {
+  //   id: uniqueId(),
+  //   product: { title: 'Men Grey Hoodie', image: product1 },
+  //   price: 99.9,
+  //   sold: 5,
+  // },
+  // {
+  //   id: uniqueId(),
+  //   product: { title: 'Women Striped T-Shirt', image: product2 },
+  //   price: 54.9,
+  //   sold: 5,
+  // },
+  // {
+  //   id: uniqueId(),
+  //   product: { title: 'Wome White T-Shirt', image: product3 },
+  //   price: 24.7,
+  //   sold: 5,
+  // },
+  // {
+  //   id: uniqueId(),
+  //   product: { title: 'Men White T-Shirt', image: product4 },
+  //   price: 44.4,
+  //   sold: 5,
+  // },
+  // {
+  //   id: uniqueId(),
+  //   product: { title: 'Men White T-Shirt', image: product5 },
+  //   price: 34.9,
+  //   sold: 5,
+  // },
+  // {
+  //   id: uniqueId(),
+  //   product: { title: 'Men Shit Shirt', image: product5 },
+  //   price: 39.1,
+  //   sold: 5,
+  // },
 ];
