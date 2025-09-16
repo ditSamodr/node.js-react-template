@@ -95,78 +95,6 @@ const ProductsPage = () => {
     });
   };
 
-  const handleNewProductChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setNewProduct((prev) => ({ ...prev, [name]: value }));
-  };
-  
-  const handleDeleteProduct = async (productId: string) => {
-    try {
-      await axios.delete(`http://localhost:3001/api/products/${productId}`);
-      
-      // Update the UI by filtering out the deleted product
-      setProducts((prevProducts) =>
-        prevProducts.filter((product) => product.id !== productId)
-      );
-      alert('Product deleted successfully!');
-    } catch (error) {
-      console.error('Failed to delete product:', error);
-      alert('Failed to delete product.');
-    }
-  };
-
-  const handleUpdateProduct = async (editingProductId: string) => {
-    try {
-      const response = await axios.put(
-        `http://localhost:3001/api/products/${editingProductId}`,
-        {
-         // ...formData,
-          title: newProduct.title,
-          price: parseFloat(newProduct.price),
-          sold: parseInt(newProduct.sold),
-          image: newProduct.image,
-        }
-      );
-
-      // Update the UI with the new data
-      setProducts((prev) =>
-        prev.map((product) =>
-          product.id === editingProductId ? response.data.data : product
-        )
-      );
-      alert('Product updated successfully!');
-    } catch (error) {
-      console.error('Failed to update product:', error);
-      alert('Failed to update product.');
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingProductId) {
-        // If there is an editing ID, call the update function
-        await handleUpdateProduct(editingProductId);
-    } else {
-        // Otherwise, call the add function
-       // await handleAddProduct(event: FormEvent);
-    }
-};
-
-  const handleAddProduct = async (event: FormEvent) => {
-    event.preventDefault();
-    if (newProduct.title && newProduct.price && newProduct.sold && newProduct.image) {
-      const response = await axios.post('http://localhost:3001/api/products',{
-        title: newProduct.title,
-        price: parseInt(newProduct.price),
-        sold: parseInt(newProduct.sold),
-        image: newProduct.image
-      });
-      console.log('Product added successfully', response.data);
-      // Clear form
-      setNewProduct({ title: '', price: '', sold: '' , image: ''});
-    }
-  };
-
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -174,7 +102,8 @@ const ProductsPage = () => {
     useEffect(() => {
       const fetchProducts = async () => {
         try {
-          const response = await axios.get('http://localhost:3001/api/products');
+          const response = await axios.get('http://localhost:3001/api/products'); //LOCAL
+          //const response = await axios.get('http://localhost:5000/api/products'); //SERVER
           const productsArray = response.data; 
           
           if (Array.isArray(productsArray)) {
@@ -203,10 +132,100 @@ const ProductsPage = () => {
     if (error) {
       return <div>Error: {error}</div>;
     }
+
+  const handleNewProductChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setNewProduct((prev) => ({ ...prev, [name]: value }));
+  };
   
-  const handleEditClick = (productToEdit: ProductData)=>{
-    setFormData(productToEdit);
-    setEditingProductId(productToEdit.id as string);
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await axios.delete(`http://localhost:3001/api/products/${productId}`); //LOCAL
+      //await axios.delete(`http://localhost:5000/api/products/${productId}`); //SERVER
+      
+      // Update the UI by filtering out the deleted product
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.id !== productId)
+      );
+      alert('Product deleted successfully!');
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+      alert('Failed to delete product.');
+    }
+  };
+
+  const handleUpdateProduct = async (editingProductId: string) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3001/api/products/${editingProductId}`, //LOCAL
+        //`http://localhost:5000/api/products/${editingProductId}`, //SERVER
+        {
+         // ...formData,
+          title: newProduct.title,
+          price: parseFloat(newProduct.price),
+          sold: parseInt(newProduct.sold),
+          image: newProduct.image,
+        }
+      );
+
+      //Update the UI with the new data
+      // setProducts((prev) =>
+      //   prev.map((product) =>
+      //     product.id === editingProductId ? response.data.data : product
+      //   )
+      // );
+      //resetForm();
+      setNewProduct({ title: '', price: '', sold: '' , image: ''});
+      window.location.reload(); 
+      alert('Product updated successfully!');
+    } catch (error) {
+      console.error('Failed to update product:', error);
+      alert('Failed to update product.');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingProductId) {
+        // If there is an editing ID, call the update function
+        await handleUpdateProduct(editingProductId);
+    } else {
+        // Otherwise, call the add function
+        await handleAddProduct(e);
+    }
+};
+
+  const handleAddProduct = async (event: FormEvent) => {
+    event.preventDefault();
+    if (newProduct.title && newProduct.price && newProduct.sold && newProduct.image) {
+      const response = await axios.post('http://localhost:3001/api/products', //LOCAL
+       // const response = await axios.post('http://localhost:5000/api/products', //SERVER
+        {
+        title: newProduct.title || '',
+        price: parseInt(newProduct.price) || 0,
+        sold: parseInt(newProduct.sold) || 0,
+        image: newProduct.image || '',
+      });
+      console.log('Product added successfully', response.data);
+      // Clear form
+      setNewProduct({ title: '', price: '', sold: '' , image: ''});
+      window.location.reload(); 
+      
+      const updatedProd = response.data.data;
+
+    }
+  };
+
+    
+  
+  const handleEditClick = (productData: TopProductsRowData)=>{
+    setNewProduct({
+      title: productData.product.title,
+      price: productData.price.toString(),
+      sold: productData.sold.toString(),
+      image: productData.product.image || '',
+    });
+    setEditingProductId(productData.id);
   }
 
   const topProductsColumns: GridColDef<TopProductsRowData>[] = [
@@ -241,7 +260,7 @@ const ProductsPage = () => {
         <Button
           variant="outlined"
           size="small"
-          onClick={() => handleUpdateProduct(params.row.id)}
+          onClick={() => handleEditClick(params.row as TopProductsRowData)}
         >
           Update
         </Button>
