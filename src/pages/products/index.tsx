@@ -24,7 +24,7 @@ interface ProductData{
   title: string;
   price: string;
   sold: string;
-  image: string;
+  image: string | null;
 }
 
 const ProductsPage = () => {
@@ -167,9 +167,6 @@ const ProductsPage = () => {
     }
   };
 
-
-
-
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -181,11 +178,11 @@ const ProductsPage = () => {
           const productsArray = response.data; 
           
           if (Array.isArray(productsArray)) {
-            const formattedData: TopProductsRowData[] = productsArray.map((item: any) => ({
+            const formattedData: TopProductsRowData[] = productsArray.map((item: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
                 id: item.id.toString(),
                 product: { 
                     title: item.title, 
-                    image: item.image  
+                    image: item.image,  // eslint-disable-line @typescript-eslint/no-explicit-any
                 },
                 price: item.price,
                 sold: item.sold,
