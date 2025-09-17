@@ -102,8 +102,8 @@ const ProductsPage = () => {
     useEffect(() => {
       const fetchProducts = async () => {
         try {
-          const response = await axios.get('http://localhost:3001/api/products'); //LOCAL
-          //const response = await axios.get('http://localhost:5000/api/products'); //SERVER
+          //const response = await axios.get('http://localhost:3001/api/products'); //LOCAL
+          const response = await axios.get('https://umbra-2.prolead.id/api/products'); //SERVER
           const productsArray = response.data; 
           
           if (Array.isArray(productsArray)) {
@@ -140,8 +140,8 @@ const ProductsPage = () => {
   
   const handleDeleteProduct = async (productId: string) => {
     try {
-      await axios.delete(`http://localhost:3001/api/products/${productId}`); //LOCAL
-      //await axios.delete(`http://localhost:5000/api/products/${productId}`); //SERVER
+      //await axios.delete(`http://localhost:3001/api/products/${productId}`); //LOCAL
+      await axios.delete(`https://umbra-2.prolead.id/api/products/${productId}`); //SERVER
       
       // Update the UI by filtering out the deleted product
       setProducts((prevProducts) =>
@@ -157,8 +157,8 @@ const ProductsPage = () => {
   const handleUpdateProduct = async (editingProductId: string) => {
     try {
       const response = await axios.put(
-        `http://localhost:3001/api/products/${editingProductId}`, //LOCAL
-        //`http://localhost:5000/api/products/${editingProductId}`, //SERVER
+        //`http://localhost:3001/api/products/${editingProductId}`, //LOCAL
+        `https://umbra-2.prolead.id/api/products/${editingProductId}`, //SERVER
         {
          // ...formData,
           title: newProduct.title,
@@ -198,8 +198,8 @@ const ProductsPage = () => {
   const handleAddProduct = async (event: FormEvent) => {
     event.preventDefault();
     if (newProduct.title && newProduct.price && newProduct.sold && newProduct.image) {
-      const response = await axios.post('http://localhost:3001/api/products', //LOCAL
-       // const response = await axios.post('http://localhost:5000/api/products', //SERVER
+      //const response = await axios.post('http://localhost:3001/api/products', //LOCAL
+      const response = await axios.post('https://umbra-2.prolead.id/api/products', //SERVER
         {
         title: newProduct.title || '',
         price: parseInt(newProduct.price) || 0,

@@ -138,27 +138,27 @@ export const transactionTableData: TransactionRowData[] = [
   },
 ];
 
-const ProductTable = () => {
-  const [products, setProducts] = useState<TopProductsRowData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// const ProductTable = () => {
+//   const [products, setProducts] = useState<TopProductsRowData[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/products');
-        setProducts(response.data);
-      } catch (err) {
-        setError('Failed to fetch products');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+//   useEffect(() => {
+//     const fetchProducts = async () => {
+//       try {
+//         const response = await axios.get('http://localhost:3000/products');
+//         setProducts(response.data);
+//       } catch (err) {
+//         setError('Failed to fetch products');
+//         console.error(err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchProducts();
+//   }, []);
 
-}
+// }
 
 export const topProductsTableData: TopProductsRowData[] = [
   // {
