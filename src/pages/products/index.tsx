@@ -240,6 +240,16 @@ const ProductsPage = () => {
     headerName: 'Name',
     minWidth: 200,
   },
+ {
+    field: 'productImage',
+    headerName: 'Description',
+    width: 200,
+    // Use renderCell to display the raw string value
+    renderCell: (params) => {
+      // Access the nested 'image' property
+      return params.row.product.image;
+    },
+  },
   {
     field: 'price',
     renderCell: (params) => {
@@ -331,7 +341,7 @@ const ProductsPage = () => {
           required
         />
         <TextField
-          label="Image"
+          label="Description"
           name="image"
           value={newProduct.image}
           onChange={handleNewProductChange}
