@@ -88,10 +88,10 @@ const Menuitems: IMenuitems[] = [
   },
   {
     id: uniqueId(),
-    title: 'Inbox',
+    title: 'Chat',
     icon: InboxIcon,
-    href: '#!',
-    available: false,
+    href: '/inbox',
+    available: true,
   },
   {
     navlabel: true,
