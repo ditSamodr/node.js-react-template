@@ -29,19 +29,25 @@ const InboxPage = () => {
     if (!input.trim()) return;
     setLoading(true); 
 
-    setMessages((prev) => [...prev, { role: "user", content: input }]);
+    //setMessages((prev) => [...prev, { role: "user", content: input }]);
+    const newUserMessage: ChatMessage = { role: "user", content: input };
+    const updatedMessages = [...messages, newUserMessage];
+
+    setMessages(updatedMessages); 
+    setInput("");
 
     try {
       const API_URL = import.meta.env.VITE_API_URL;
       const res = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ messages: updatedMessages }),
       });
 
       const data = await res.json();
+      const assistantMessage: ChatMessage = { role: "assistant", content: data.reply };
       //setReply(data.reply);
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      setMessages((prev) => [...prev, assistantMessage]); 
     } catch (error) {
       console.error("Error:", error);
       setReply("Something went wrong.");
