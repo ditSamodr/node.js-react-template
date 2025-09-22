@@ -23,7 +23,8 @@ const InboxPage = () => {
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/chat", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input }),
@@ -55,13 +56,13 @@ const InboxPage = () => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         variant="outlined"
-        size="small" 
+        size="small"
         InputProps={{
-          sx: { fontSize: "1.2rem", 
-                alignItems: "flex-start", // top-aligns input box
+          sx: { fontSize: "1.0rem",
+                alignItems: "flex-start",
                 "& .MuiInputBase-inputMultiline": {
-                  padding: "8px",         // adjust padding
-                  lineHeight: "2",      // keeps it readable
+                  padding: "8px",
+                  lineHeight: "2",
                 },
               }, 
           }}

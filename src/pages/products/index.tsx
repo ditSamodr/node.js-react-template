@@ -28,6 +28,7 @@ interface ProductData{
 }
 
 const ProductsPage = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [searchText, setSearchText] = useState('');
 
   const [newProduct, setNewProduct] = useState({
@@ -102,8 +103,7 @@ const ProductsPage = () => {
     useEffect(() => {
       const fetchProducts = async () => {
         try {
-          //const response = await axios.get('http://localhost:3001/api/products'); //LOCAL
-          const response = await axios.get('https://umbra-2.prolead.id/api/products'); //SERVER
+          const response = await axios.get(`${API_URL}/products`); //SERVER
           const productsArray = response.data; 
           
           if (Array.isArray(productsArray)) {
@@ -140,8 +140,7 @@ const ProductsPage = () => {
   
   const handleDeleteProduct = async (productId: string) => {
     try {
-      //await axios.delete(`http://localhost:3001/api/products/${productId}`); //LOCAL
-      await axios.delete(`https://umbra-2.prolead.id/api/products/${productId}`); //SERVER
+      await axios.delete(`${API_URL}/products/${productId}`); //SERVER
       
       // Update the UI by filtering out the deleted product
       setProducts((prevProducts) =>
@@ -157,8 +156,7 @@ const ProductsPage = () => {
   const handleUpdateProduct = async (editingProductId: string) => {
     try {
       const response = await axios.put(
-        //`http://localhost:3001/api/products/${editingProductId}`, //LOCAL
-        `https://umbra-2.prolead.id/api/products/${editingProductId}`, //SERVER
+        `${API_URL}/products/${editingProductId}`, //SERVER
         {
          // ...formData,
           title: newProduct.title,
@@ -168,13 +166,6 @@ const ProductsPage = () => {
         }
       );
 
-      //Update the UI with the new data
-      // setProducts((prev) =>
-      //   prev.map((product) =>
-      //     product.id === editingProductId ? response.data.data : product
-      //   )
-      // );
-      //resetForm();
       setNewProduct({ title: '', price: '', sold: '' , image: ''});
       window.location.reload(); 
       alert('Product updated successfully!');
@@ -198,8 +189,7 @@ const ProductsPage = () => {
   const handleAddProduct = async (event: FormEvent) => {
     event.preventDefault();
     if (newProduct.title && newProduct.price && newProduct.sold && newProduct.image) {
-      //const response = await axios.post('http://localhost:3001/api/products', //LOCAL
-      const response = await axios.post('https://umbra-2.prolead.id/api/products', //SERVER
+      const response = await axios.post(`${API_URL}/products`, //SERVER
         {
         title: newProduct.title || '',
         price: parseInt(newProduct.price) || 0,
