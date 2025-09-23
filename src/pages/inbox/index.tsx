@@ -26,29 +26,23 @@ const InboxPage = () => {
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState <string | null>(null);
 
-
-  const startNewSession = async () => {
-    try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const res = await fetch(`${API_URL}/session`, {
-        method: "POST",
-      });
-      const data = await res.json();
-      setSessionId(data.sessionId);
-    }catch (error){
-      console.error("Failed to start a new session:", error);
-    }finally{
-      setLoading(false);
-    }
-  };
+    const startNewSession = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/session`, {
+          method: "POST",
+        });
+        const data = await res.json();
+        setSessionId(data.sessionId);
+      }catch (error){
+        console.error("Failed to start a new session:", error);
+      }
+    };
+ 
 
   useEffect(() => {
     startNewSession();
-  }, [])
-
-  const handleNewChat = () => {
-    startNewSession();
-  }
+  })
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -85,11 +79,30 @@ const InboxPage = () => {
     }
   };
 
+  const handleNewChat = async () => {
+    setMessages([]); 
+    setInput("");    
+    setReply("");  
+    setLoading(true);
+    await startNewSession(); 
+    setLoading(false);
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
         Chat with us
       </Typography>
+
+       {/* New Chat Button */}
+      <Button
+        variant="outlined"
+        color="secondary"
+        onClick={handleNewChat}
+        sx={{ mb: 2 }}
+      >
+        New Chat
+      </Button>
 
       {/* Input field */}
       <TextField
@@ -113,25 +126,15 @@ const InboxPage = () => {
         sx={{ mb: 2 }}
       />
 
-{/* Action buttons */}
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={sendMessage}
-          disabled={loading || !sessionId}
-        >
-          {loading ? "Sending..." : "Send"}
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={handleNewChat}
-          disabled={loading}
-        >
-          New Chat
-        </Button>
-      </Box>
+      {/* Send button */}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={sendMessage}
+        disabled={loading}
+      >
+        {loading ? "Sending..." : "Send"}
+      </Button>
 
       {/* Conversation */}
       {messages.length > 0 && (
