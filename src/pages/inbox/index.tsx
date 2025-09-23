@@ -42,7 +42,7 @@ const InboxPage = () => {
 
   useEffect(() => {
     startNewSession();
-  })
+  }, [])
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -122,7 +122,7 @@ const InboxPage = () => {
                   lineHeight: "2",
                 },
               }, 
-          }}
+        }}
         sx={{ mb: 2 }}
       />
 
