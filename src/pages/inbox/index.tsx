@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   LinearProgress,
@@ -24,12 +24,36 @@ const InboxPage = () => {
   const [reply, setReply] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState <string | null>(null);
+
+
+  const startNewSession = async () => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/session`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      setSessionId(data.sessionId);
+    }catch (error){
+      console.error("Failed to start a new session:", error);
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    startNewSession();
+  }, [])
+
+  const handleNewChat = () => {
+    startNewSession();
+  }
 
   const sendMessage = async () => {
     if (!input.trim()) return;
     setLoading(true); 
 
-    //setMessages((prev) => [...prev, { role: "user", content: input }]);
     const newUserMessage: ChatMessage = { role: "user", content: input };
     const updatedMessages = [...messages, newUserMessage];
 
@@ -41,7 +65,7 @@ const InboxPage = () => {
       const res = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updatedMessages }),
+        body: JSON.stringify({ sessionId: sessionId, messages: updatedMessages }),
       });
 
       const data = await res.json();
@@ -89,15 +113,25 @@ const InboxPage = () => {
         sx={{ mb: 2 }}
       />
 
-      {/* Send button */}
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={sendMessage}
-        disabled={loading}
-      >
-        {loading ? "Sending..." : "Send"}
-      </Button>
+{/* Action buttons */}
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={sendMessage}
+          disabled={loading || !sessionId}
+        >
+          {loading ? "Sending..." : "Send"}
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={handleNewChat}
+          disabled={loading}
+        >
+          New Chat
+        </Button>
+      </Box>
 
       {/* Conversation */}
       {messages.length > 0 && (
