@@ -71,6 +71,8 @@ const ReportsPage = () => {
     return <Typography>Loading history...</Typography>;
   }
 
+  let previousSessionId = "";
+
   return (
    <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
@@ -103,15 +105,27 @@ const ReportsPage = () => {
               <TableCell>Date</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {sortedMessages.map((message, index) => (
-              <TableRow key={index}>
-                <TableCell>{message.session_id}</TableCell>
-                <TableCell>{message.role}</TableCell>
-                <TableCell>{message.content}</TableCell>
-                <TableCell>{new Date(message.date).toLocaleString()}</TableCell>
-              </TableRow>
-            ))}
+                    <TableBody>
+            {sortedMessages.map((message, index) => {
+              const isNewSession = message.session_id !== previousSessionId;
+              previousSessionId = message.session_id;
+
+              return (
+                <TableRow
+                  key={index}
+                  sx={{
+                    borderTop: isNewSession
+                      ? '4px solid #3f51b5' // You can change this color
+                      : 'none',
+                  }}
+                >
+                  <TableCell>{message.session_id}</TableCell>
+                  <TableCell>{message.role}</TableCell>
+                  <TableCell>{message.content}</TableCell>
+                  <TableCell>{new Date(message.date).toLocaleString()}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
