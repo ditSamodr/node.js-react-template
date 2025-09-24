@@ -21,7 +21,8 @@ import ReactMarkdown from 'react-markdown';
 type SessionSummary = {
   session_id: string;
   chat_count: number;
-  last_message: string;
+   last_message_content: string; // Updated field name
+  last_message_role: string;
   last_message_date: string;
 };
 
@@ -110,7 +111,10 @@ const ReportsPage = () => {
                 <TableCell>{session.session_id}</TableCell>
                 <TableCell>{session.chat_count}</TableCell>
                 <TableCell>
-                  <ReactMarkdown>{truncate(session.last_message, 100)}</ReactMarkdown>
+                   {session.last_message_role?.toUpperCase() || 'N/A'}:{" "}
+                  <ReactMarkdown>
+                    {truncate(session.last_message_content || 'No message content.', 50)}
+                  </ReactMarkdown>
                 </TableCell>            
                 <TableCell>
                   <Button
