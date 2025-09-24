@@ -74,10 +74,10 @@ const Menuitems: IMenuitems[] = [
   },
   {
     id: uniqueId(),
-    title: 'Reports',
+    title: 'Chat Reports',
     icon: ReportsIcon,
-    href: '#!',
-    available: false,
+    href: '/reports',
+    available: true,
   },
   {
     id: uniqueId(),
