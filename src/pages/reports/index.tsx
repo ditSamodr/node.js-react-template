@@ -9,8 +9,20 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Button
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress
 } from "@mui/material";
+
+type SessionSummary = {
+  session_id: string;
+  chat_count: number;
+  last_message: string;
+  last_message_date: string;
+};
 
 type Message = {
   session_id: string;
@@ -20,115 +32,121 @@ type Message = {
 };
 
 const ReportsPage = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortColumn, setSortColumn] = useState<"session_id" | "date">("date");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [selectedSessionMessages, setSelectedSessionMessages] = useState<Message[]>([]);
+  const [loadingSession, setLoadingSession] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const fetchSummaries = async () => {
       try {
-        const res = await fetch(`${API_URL}/history`);
+        const res = await fetch(`${API_URL}/sessions-summary`);
         const data = await res.json();
-        setMessages(data.messages);
+        setSessions(data.sessions);
       } catch (error) {
-        console.error("Failed to fetch history:", error);
+        console.error("Failed to fetch session summaries:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchHistory();
+    fetchSummaries();
   }, [API_URL]);
 
-    const handleSort = (column: "session_id" | "date") => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
+  const handleViewChat = async (sessionId: string) => {
+    setLoadingSession(true);
+    setSelectedSessionId(sessionId);
+    setOpenDialog(true);
+    try {
+      const res = await fetch(`${API_URL}/session/${sessionId}`);
+      const data = await res.json();
+      setSelectedSessionMessages(data.messages);
+    } catch (error) {
+      console.error("Failed to fetch session chat:", error);
+    } finally {
+      setLoadingSession(false);
     }
   };
 
-  const sortedMessages = [...messages].sort((a, b) => {
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
-
-    if (sortColumn === "date") {
-      const aDate = new Date(aValue);
-      const bDate = new Date(bValue);
-      if (aDate < bDate) return sortDirection === "asc" ? -1 : 1;
-      if (aDate > bDate) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    } else { 
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    }
-  });
+   const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedSessionId(null);
+    setSelectedSessionMessages([]);
+  };
 
   if (loading) {
-    return <Typography>Loading history...</Typography>;
+    return <Typography>Loading sessions...</Typography>;
   }
 
-  let previousSessionId = "";
-
   return (
-   <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Chat History
+        Conversation Logs
       </Typography>
-
-        {/* Sort Buttons */}
-      <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
-        <Button
-          variant="outlined"
-          onClick={() => handleSort("session_id")}
-        >
-          Sort by Session ID {sortColumn === "session_id" && (sortDirection === "asc" ? "↑" : "↓")}
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => handleSort("date")}
-        >
-          Sort by Date {sortColumn === "date" && (sortDirection === "asc" ? "↑" : "↓")}
-        </Button>
-      </Box>
 
       <TableContainer component={Paper} elevation={3}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Session ID</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Content</TableCell>
-              <TableCell>Date</TableCell>
+              <TableCell>Chat Number</TableCell>
+              <TableCell>Last Message</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
-                    <TableBody>
-            {sortedMessages.map((message, index) => {
-              const isNewSession = message.session_id !== previousSessionId;
-              previousSessionId = message.session_id;
-
-              return (
-                <TableRow
-                  key={index}
-                  sx={{
-                    borderTop: isNewSession
-                      ? '4px solid #3f51b5' // You can change this color
-                      : 'none',
-                  }}
-                >
-                  <TableCell>{message.session_id}</TableCell>
-                  <TableCell>{message.role}</TableCell>
-                  <TableCell>{message.content}</TableCell>
-                  <TableCell>{new Date(message.date).toLocaleString()}</TableCell>
-                </TableRow>
-              );
-            })}
+          <TableBody>
+            {sessions.map((session) => (
+              <TableRow key={session.session_id}>
+                <TableCell>{session.session_id}</TableCell>
+                <TableCell>{session.chat_count}</TableCell>
+                <TableCell>{session.last_message}</TableCell>              
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleViewChat(session.session_id)}
+                  >
+                    Show Details
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        <DialogTitle>Conversation Log</DialogTitle>
+        <DialogTitle> {`Session ID: ${selectedSessionId || ''} `}</DialogTitle>
+        <DialogTitle>{`Total Chat Number: ${selectedSessionMessages.length} `}</DialogTitle>
+        <DialogTitle>Chat Detail</DialogTitle>
+        <DialogContent dividers>
+          {loadingSession ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            selectedSessionMessages.length > 0 ? (
+              selectedSessionMessages.map((msg, index) => (
+                <Paper key={index} elevation={2} sx={{ p: 2, mb: 2, backgroundColor: msg.role === 'user' ? '#e3f2fd' : '#f1f8e9' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {index + 1}. {new Date(msg.date).toLocaleString()}
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 1 }}>
+                    {msg.role.toUpperCase()}: {msg.content}
+                  </Typography>
+                </Paper>
+              ))
+            ) : (
+              <Typography>No messages found for this session.</Typography>
+            )
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
