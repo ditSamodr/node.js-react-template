@@ -14,8 +14,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
+import ReactMarkdown from 'react-markdown';
 
 type SessionSummary = {
   session_id: string;
@@ -80,6 +81,13 @@ const ReportsPage = () => {
     return <Typography>Loading sessions...</Typography>;
   }
 
+  const truncate = (text: string, length: number) => {
+  if (text.length > length) {
+    return text.substring(0, length) + '...';
+  }
+  return text;
+};
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
@@ -101,7 +109,9 @@ const ReportsPage = () => {
               <TableRow key={session.session_id}>
                 <TableCell>{session.session_id}</TableCell>
                 <TableCell>{session.chat_count}</TableCell>
-                <TableCell>{session.last_message}</TableCell>              
+                <TableCell>
+                  <ReactMarkdown>{truncate(session.last_message, 100)}</ReactMarkdown>
+                </TableCell>            
                 <TableCell>
                   <Button
                     variant="contained"
@@ -134,8 +144,13 @@ const ReportsPage = () => {
                     {index + 1}. {new Date(msg.date).toLocaleString()}
                   </Typography>
                   <Typography variant="body1" sx={{ mt: 1 }}>
-                    {msg.role.toUpperCase()}: {msg.content}
+                    {msg.role.toUpperCase()}: 
                   </Typography>
+
+                  <ReactMarkdown>
+                      {msg.content}
+                  </ReactMarkdown>
+                  
                 </Paper>
               ))
             ) : (
