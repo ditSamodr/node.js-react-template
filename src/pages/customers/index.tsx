@@ -8,6 +8,7 @@ import {
   LinearProgress,
   Stack,
   TextField,
+  Tooltip
 } from '@mui/material';
 import {
   DataGrid,
@@ -33,6 +34,7 @@ type Lead = {
   lead_phone: string | null;
   lead_email: string | null;
   lead_address: string | null;
+  lead_notes: string | null;
 };
 
 // Define the initial state for an empty lead
@@ -41,6 +43,7 @@ const emptyLead: Omit<Lead, 'id'> = {
   lead_phone: null,
   lead_email: null,
   lead_address: null,
+  lead_notes: null,
 };
 
 const CustomersPage = () => {
@@ -112,8 +115,8 @@ const [rows, setRows] = useState<Lead[]>([]);
       if (!res.ok) throw new Error('Failed to create');
       handleCloseAdd();
       await fetchLeads();
-    } catch (_) {
-      // noop
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
     }
   };
 
@@ -129,8 +132,8 @@ const [rows, setRows] = useState<Lead[]>([]);
       if (!res.ok) throw new Error('Failed to update');
       handleCloseEdit();
       await fetchLeads();
-    } catch (_) {
-      // noop
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
     }
   };
 
@@ -139,8 +142,8 @@ const [rows, setRows] = useState<Lead[]>([]);
       const res = await fetch(`${API_URL}/leads/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
       await fetchLeads();
-    } catch (_) {
-      // noop
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
     }
   };
 
@@ -151,11 +154,12 @@ const [rows, setRows] = useState<Lead[]>([]);
       lead_phone: row.lead_phone ?? '',
       lead_email: row.lead_email ?? '',
       lead_address: row.lead_address ?? '',
+      lead_notes: row.lead_notes ?? ''
     });
     setEditOpen(true);
   };
 
-  // Define the columns for the DataGrid
+
   const columns: GridColDef<Lead>[] = useMemo(
     () => [
       { field: 'id', headerName: 'ID', width: 80 },
@@ -164,6 +168,27 @@ const [rows, setRows] = useState<Lead[]>([]);
       { field: 'lead_email', headerName: 'Email', minWidth: 200, flex: 1 },
       { field: 'lead_address', headerName: 'Address', minWidth: 200, flex: 1 },
       {
+      field: 'lead_notes',
+      headerName: 'Notes',
+      minWidth: 200,
+      flex: 1,
+      // Custom rendering for the cell
+      renderCell: (params: GridRenderCellParams<Lead>) => (
+        <Tooltip title={params.value}>
+          <Box
+            sx={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {params.value}
+          </Box>
+        </Tooltip>
+      ),
+      },
+      {
+        
         field: 'actions',
         headerName: 'Actions',
         sortable: false,
@@ -293,6 +318,20 @@ const [rows, setRows] = useState<Lead[]>([]);
             value={formValues.lead_address ?? ''}
             onChange={handleFormChange}
           />
+          <TextField
+            label="Notes"
+            name="lead_notes"
+            value={formValues.lead_notes ?? ''}
+            onChange={handleFormChange}
+            multiline
+            rows={4}
+            InputProps={{
+              style: {
+                lineHeight: '1.25rem', // Adjust this value to control line spacing
+                padding: '8px 12px',   // Add padding for better spacing around the text
+              },
+            }}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseAdd}>Cancel</Button>
@@ -337,6 +376,20 @@ const [rows, setRows] = useState<Lead[]>([]);
             name="lead_address"
             value={formValues.lead_address ?? ''}
             onChange={handleFormChange}
+          />
+          <TextField
+            label="Notes"
+            name="lead_notes"
+            value={formValues.lead_notes ?? ''}
+            onChange={handleFormChange}
+            multiline
+            rows={4}
+            InputProps={{
+              style: {
+                lineHeight: '1.25rem', // Adjust this value to control line spacing
+                padding: '8px 12px',   // Add padding for better spacing around the text
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>

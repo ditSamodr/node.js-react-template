@@ -21,7 +21,7 @@ import ReactMarkdown from 'react-markdown';
 type SessionSummary = {
   session_id: string;
   chat_count: number;
-   last_message_content: string; // Updated field name
+   last_message_content: string; 
   last_message_role: string;
   last_message_date: string;
 };
