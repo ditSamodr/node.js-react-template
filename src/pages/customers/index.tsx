@@ -178,7 +178,12 @@ const [rows, setRows] = useState<Lead[]>([]);
 
   const handleImport = async (event: ChangeEvent<HTMLInputElement>)=>{
     const file = event.target.files?.[0];
-    if(!file) return;
+    const inputElement = event.currentTarget;
+
+    if(!file){
+      inputElement.value = '';
+      return;
+    } 
 
     const reader = new FileReader();
     reader.onload = async (e) =>{
@@ -198,6 +203,8 @@ const [rows, setRows] = useState<Lead[]>([]);
         await fetchLeads();
       } catch (err){
         console.error('Import Failed: ', err);
+      } finally{
+        inputElement.value = '';
       }
     };
     reader.readAsText(file);
