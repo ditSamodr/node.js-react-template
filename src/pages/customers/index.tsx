@@ -159,6 +159,49 @@ const [rows, setRows] = useState<Lead[]>([]);
     setEditOpen(true);
   };
 
+  const handleExport = async () => {
+    try {
+      const res = await fetch(`${API_URL}/leads/export`);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'leads.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+    }
+  };
+
+  const handleImport = async (event: ChangeEvent<HTMLInputElement>)=>{
+    const file = event.target.files?.[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) =>{
+      const text = e.target?.result;
+      if(typeof text !== 'string') return;
+
+      try{
+        const res = await fetch(`${API_URL}/leads/import`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/csv',
+          },
+          body: text,
+        });
+
+        if (!res.ok)throw new Error('Failed to Import');
+        await fetchLeads();
+      } catch (err){
+        console.error('Import Failed: ', err);
+      }
+    };
+    reader.readAsText(file);
+  }
 
   const columns: GridColDef<Lead>[] = useMemo(
     () => [
@@ -226,6 +269,13 @@ const [rows, setRows] = useState<Lead[]>([]);
         <Box />
         <Button variant="contained" onClick={handleOpenAdd}>
           Add Lead
+        </Button>
+        <Button variant="outlined" component="label">
+          Import CSV
+          <input type="file" accept=".csv" hidden onChange={handleImport} />
+        </Button>
+        <Button variant="outlined" onClick={handleExport}>
+          Export CSV
         </Button>
       </Stack>
 
