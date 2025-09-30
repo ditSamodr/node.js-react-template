@@ -27,7 +27,6 @@ import SimpleBar from 'simplebar-react';
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
 
-// Define the type for a Lead
 type Lead = {
   id: number;
   lead_name: string;
@@ -37,7 +36,6 @@ type Lead = {
   lead_notes: string | null;
 };
 
-// Define the initial state for an empty lead
 const emptyLead: Omit<Lead, 'id'> = {
   lead_name: '',
   lead_phone: null,
@@ -46,7 +44,7 @@ const emptyLead: Omit<Lead, 'id'> = {
   lead_notes: null,
 };
 
-const CustomersPage = () => {
+const CustomerPage = () => {
 const [rows, setRows] = useState<Lead[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchText, setSearchText] = useState('');
@@ -65,13 +63,12 @@ const [rows, setRows] = useState<Lead[]>([]);
       setRows(data);
       apiRef.current.setRows(data);
     } catch (err) {
-      // noop: could add a toast here
+      console.error("Failed to fetch products:", err);
     } finally {
       setLoading(false);
     }
   }, [apiRef]);
 
-  // Fetch leads on component mount
   useEffect(() => {
     fetchLeads();
   }, [fetchLeads]);
@@ -222,7 +219,6 @@ const [rows, setRows] = useState<Lead[]>([]);
       headerName: 'Notes',
       minWidth: 200,
       flex: 1,
-      // Custom rendering for the cell
       renderCell: (params: GridRenderCellParams<Lead>) => (
         <Tooltip title={params.value}>
           <Box
@@ -384,8 +380,8 @@ const [rows, setRows] = useState<Lead[]>([]);
             rows={4}
             InputProps={{
               style: {
-                lineHeight: '1.25rem', // Adjust this value to control line spacing
-                padding: '8px 12px',   // Add padding for better spacing around the text
+                lineHeight: '1.25rem', 
+                padding: '8px 12px',  
               },
             }}
           />
@@ -443,8 +439,8 @@ const [rows, setRows] = useState<Lead[]>([]);
             rows={4}
             InputProps={{
               style: {
-                lineHeight: '1.25rem', // Adjust this value to control line spacing
-                padding: '8px 12px',   // Add padding for better spacing around the text
+                lineHeight: '1.25rem', 
+                padding: '8px 12px',   
               },
             }}
           />
@@ -460,4 +456,4 @@ const [rows, setRows] = useState<Lead[]>([]);
   );
 };
 
-export default CustomersPage;
+export default CustomerPage;
